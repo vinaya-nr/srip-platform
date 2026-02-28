@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  nginx:
+    restart: always
+    ports:
+      - "80:80"
+
+  api:
+    restart: always
+    command: sh /app/scripts/start-api.sh
+
+  worker:
+    restart: always
+    command: sh /app/scripts/start-worker.sh
+
+  beat:
+    restart: always
+    command: sh /app/scripts/start-beat.sh
+
+  postgres:
+    restart: always
+
+  redis:
+    restart: always
+
+  minio:
+    restart: always

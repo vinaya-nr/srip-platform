@@ -1,0 +1,38 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python / backend
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+backend/.venv/
+backend/.env
+backend/celerybeat-schedule
+backend/celerybeat-schedule-shm
+backend/celerybeat-schedule-wal
+
+# Node / frontend
+frontend/node_modules/
+frontend/.next/
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/tests/.auth/
+frontend/.env.local
+
+# Root-level temp artifacts
+.coverage
+.pytest_cache/
+
+# Logs
+*.log
+
+# Certificates / secrets
+nginx/certs/*
+!nginx/certs/.gitkeep

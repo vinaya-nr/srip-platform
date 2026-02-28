@@ -1,0 +1,25 @@
+{
+  "all": true,
+  "extension": [
+    ".ts",
+    ".tsx"
+  ],
+  "include": [
+    "components/**/*.tsx",
+    "lib/**/*.ts",
+    "stores/**/*.ts",
+    "app/(public)/login/page.tsx",
+    "app/(public)/register/page.tsx",
+    "app/(protected)/settings/page.tsx"
+  ],
+  "exclude": [
+    "tests/**",
+    "**/*.d.ts"
+  ],
+  "reporter": [
+    "text",
+    "html",
+    "lcov"
+  ],
+  "report-dir": "./coverage"
+}
