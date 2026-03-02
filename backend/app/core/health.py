@@ -12,7 +12,9 @@ def check_postgres(db: Session) -> bool:
         db.execute(text("SELECT 1"))
         return True
     except Exception as e:
-        logger.exception("Postgres healthcheck failed")
+         # Force visible error message even if traceback suppressed
+        logger.error(f"Postgres healthcheck failed: {type(e).__name__}: {e}")
+        logger.error("Traceback:", exc_info=True)
         return False
 
 
