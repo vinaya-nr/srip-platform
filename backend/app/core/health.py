@@ -1,15 +1,18 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+import logging
 
 from app.core.security import get_redis_client
 from app.workers.celery_app import celery_app
 
+logger = logging.getLogger(__name__)
 
 def check_postgres(db: Session) -> bool:
     try:
         db.execute(text("SELECT 1"))
         return True
-    except Exception:
+    except Exception as e:
+        logger.exception("Postgres healthcheck failed")
         return False
 
 
