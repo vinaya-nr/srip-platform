@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import field_validator
+from pydantic import field_validator,Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     api_v1_prefix: str = "/api/v1"
 
-    database_url: str = "postgresql+psycopg2://srip:srip@postgres:5432/srip"
+    database_url: str = Field(..., alias="DATABASE_URL")
     redis_url: str = "redis://redis:6379/0"
 
     secret_key: str = "change-me-in-production"
