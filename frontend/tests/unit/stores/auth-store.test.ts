@@ -58,4 +58,32 @@ describe("auth store", () => {
     expect(useAuthStore.getState().accessToken).toBeNull();
     expect(useAuthStore.getState().user).toBeNull();
   });
+
+  it("deduplicates concurrent refresh calls", async () => {
+    let resolveFetch: ((value: unknown) => void) | undefined;
+    fetchMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        })
+    );
+
+    const first = useAuthStore.getState().refreshSession();
+    const second = useAuthStore.getState().refreshSession();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    resolveFetch?.({
+      ok: true,
+      json: async () => ({
+        access_token: "shared-token",
+        token_type: "bearer",
+        expires_in: 900,
+        user: { id: "u2", email: "fresh@example.com", shop_id: "shop2" }
+      })
+    });
+
+    await expect(first).resolves.toBe("shared-token");
+    await expect(second).resolves.toBe("shared-token");
+    expect(useAuthStore.getState().accessToken).toBe("shared-token");
+  });
 });
