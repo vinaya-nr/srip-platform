@@ -8,11 +8,19 @@ from app.modules.sales.schemas import SaleCreateSchema, SaleItemCreateSchema
 
 
 class StubProduct:
-    def __init__(self, id: str = "p1", price: float = 10.0, sku: str = "SKU-1", is_active: bool = True) -> None:
+    def __init__(
+        self,
+        id: str = "p1",
+        price: float = 10.0,
+        sku: str = "SKU-1",
+        is_active: bool = True,
+        name: str = "Product 1",
+    ) -> None:
         self.id = id
         self.price = price
         self.sku = sku
         self.is_active = is_active
+        self.name = name
 
 
 class StubSale:
@@ -66,6 +74,7 @@ def test_create_sale_success(monkeypatch) -> None:  # noqa: ANN001
     payload = SaleCreateSchema(items=[SaleItemCreateSchema(product_id="p1", quantity=1)])
     resp = sales_service.create_sale(MockDB(), payload, "s1", "corr-1")
     assert resp.total_amount == Decimal("10.00")
+    assert resp.items[0].product_name == "Product 1"
     assert len(calls) >= 1
 
 
@@ -150,7 +159,7 @@ def test_list_sales_service(monkeypatch) -> None:  # noqa: ANN001
         lambda *_args, **_kwargs: ([StubSaleBasic()], 1),
     )
     monkeypatch.setattr(
-        "app.modules.sales.repository.sales_repository.sale_items",
+        "app.modules.sales.repository.sales_repository.sale_items_with_product_names",
         lambda *_args, **_kwargs: [],
     )
     result = sales_service.list_sales(None, "s1")
@@ -174,7 +183,10 @@ def test_list_sales_service_passes_date_filters(monkeypatch) -> None:  # noqa: A
         return [StubSaleBasic()], 1
 
     monkeypatch.setattr("app.modules.sales.repository.sales_repository.list_sales", fake_list_sales)
-    monkeypatch.setattr("app.modules.sales.repository.sales_repository.sale_items", lambda *_args, **_kwargs: [])
+    monkeypatch.setattr(
+        "app.modules.sales.repository.sales_repository.sale_items_with_product_names",
+        lambda *_args, **_kwargs: [],
+    )
 
     result = sales_service.list_sales(None, "s1", from_date=date(2026, 2, 1), to_date=date(2026, 2, 28))
     assert result.total == 1

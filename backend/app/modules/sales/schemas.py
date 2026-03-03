@@ -15,6 +15,7 @@ class SaleCreateSchema(BaseModel):
 
 class SaleItemResponseSchema(BaseModel):
     product_id: str
+    product_name: str | None = None
     quantity: int
     unit_price: Decimal
     line_total: Decimal

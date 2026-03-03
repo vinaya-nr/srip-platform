@@ -63,7 +63,7 @@ export default function SaleDetailPage({ params }: { params: { id: string } }) {
             <tbody>
               {data.items.map((item) => (
                 <tr key={`${item.product_id}-${item.quantity}-${item.line_total}`}>
-                  <td>{item.product_id}</td>
+                  <td>{item.product_name ?? item.product_id}</td>
                   <td>{item.quantity}</td>
                   <td>{formatMoney(item.unit_price, currency)}</td>
                   <td>{formatMoney(item.line_total, currency)}</td>

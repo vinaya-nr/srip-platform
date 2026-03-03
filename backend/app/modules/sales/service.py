@@ -37,6 +37,7 @@ class SalesService:
             enriched_items.append(
                 {
                     "product_id": item.product_id,
+                    "product_name": product.name,
                     "quantity": item.quantity,
                     "unit_price": unit_price,
                     "line_total": line_total,
@@ -45,10 +46,15 @@ class SalesService:
 
         sale_number = f"SRIP-{datetime.now(UTC).strftime('%Y%m%d')}-{uuid4().hex[:8].upper()}"
         sale = sales_repository.create_sale(db, shop_id, sale_number, round(total, 2))
-        sale_items = []
         for entry in enriched_items:
-            sale_item = sales_repository.add_sale_item(db, sale.id, **entry)
-            sale_items.append(sale_item)
+            sales_repository.add_sale_item(
+                db,
+                sale.id,
+                product_id=entry["product_id"],
+                quantity=entry["quantity"],
+                unit_price=entry["unit_price"],
+                line_total=entry["line_total"],
+            )
             inventory_repository.consume_stock(db, shop_id, entry["product_id"], entry["quantity"])
             inventory_repository.create_stock_movement(
                 db,
@@ -82,21 +88,29 @@ class SalesService:
             sale_number=sale.sale_number,
             total_amount=sale.total_amount,
             created_at=sale.created_at,
-            items=[SaleItemResponseSchema.model_validate(item) for item in sale_items],
+            items=[SaleItemResponseSchema.model_validate(item) for item in enriched_items],
         )
 
     def get_sale(self, db: Session, shop_id: str, sale_id: str) -> SaleResponseSchema:
         sale = sales_repository.get_sale(db, shop_id, sale_id)
         if not sale:
             raise NotFoundException("No sale found for provided ID.")
-        items = sales_repository.sale_items(db, sale.id)
+        items = sales_repository.sale_items_with_product_names(db, shop_id, sale.id)
         return SaleResponseSchema(
             id=sale.id,
             shop_id=sale.shop_id,
             sale_number=sale.sale_number,
             total_amount=sale.total_amount,
             created_at=sale.created_at,
-            items=[SaleItemResponseSchema.model_validate(i) for i in items],
+            items=[
+                SaleItemResponseSchema.model_validate(
+                    {
+                        **item,
+                        "product_name": item.get("product_name") or item["product_id"],
+                    }
+                )
+                for item in items
+            ],
         )
 
     def list_sales(
@@ -113,7 +127,7 @@ class SalesService:
         sales, total = sales_repository.list_sales(db, shop_id, skip, limit, from_date, to_date)
         response_items: list[SaleResponseSchema] = []
         for sale in sales:
-            sale_items = sales_repository.sale_items(db, sale.id)
+            sale_items = sales_repository.sale_items_with_product_names(db, shop_id, sale.id)
             response_items.append(
                 SaleResponseSchema(
                     id=sale.id,
@@ -121,7 +135,15 @@ class SalesService:
                     sale_number=sale.sale_number,
                     total_amount=sale.total_amount,
                     created_at=sale.created_at,
-                    items=[SaleItemResponseSchema.model_validate(i) for i in sale_items],
+                    items=[
+                        SaleItemResponseSchema.model_validate(
+                            {
+                                **item,
+                                "product_name": item.get("product_name") or item["product_id"],
+                            }
+                        )
+                        for item in sale_items
+                    ],
                 )
             )
         return SaleListResponseSchema(items=response_items, total=total, skip=skip, limit=limit)

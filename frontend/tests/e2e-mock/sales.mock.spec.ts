@@ -113,7 +113,7 @@ test("sale detail page shows Back button and returns to sales list", async ({ pa
         total_amount: "100.00",
         created_at: "2026-02-26T09:15:00Z",
         items: [
-          { product_id: "p1", quantity: 1, unit_price: "100.00", line_total: "100.00" }
+          { product_id: "p1", product_name: "Milk", quantity: 1, unit_price: "100.00", line_total: "100.00" }
         ]
       })
     });
@@ -125,7 +125,7 @@ test("sale detail page shows Back button and returns to sales list", async ({ pa
 
   await expect(page.getByTestId("sale-detail-page")).toBeVisible();
   await expect(page.getByTestId("sale-detail-back")).toBeVisible();
+  await expect(page.getByTestId("sale-detail-items")).toContainText("Milk");
   await page.getByTestId("sale-detail-back").click();
   await expect(page).toHaveURL(/\/sales$/);
 });
-

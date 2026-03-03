@@ -32,4 +32,5 @@ test("sale detail page renders summary and line items", async ({ page, request }
   await expect(page.getByTestId("sale-detail-page")).toBeVisible();
   await expect(page.getByTestId("sale-detail-summary")).toContainText("Sale ID:");
   await expect(page.getByTestId("sale-detail-items").locator("tbody tr")).toHaveCount(1);
+  await expect(page.getByTestId("sale-detail-items")).toContainText(`Detail Product ${suffix}`);
 });

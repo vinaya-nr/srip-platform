@@ -62,6 +62,7 @@ export type Batch = {
 
 export type SaleItem = {
   product_id: string;
+  product_name?: string | null;
   quantity: number;
   unit_price: string;
   line_total: string;
